@@ -42,7 +42,7 @@ const CoffeeStore = (initialProps) => {
 
   const id = router.query.id;
 
-  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore || {});
 
   const {
     state: { coffeeStores },
@@ -66,7 +66,7 @@ const CoffeeStore = (initialProps) => {
         })
       });
       const dbCoffeeStore = await response.json();
-    }catch(err) {
+    } catch (err) {
       console.error(err);
     }
   }
@@ -78,26 +78,26 @@ const CoffeeStore = (initialProps) => {
           return coffeeStore.fsq_id.toString() === id;
         });
 
-        if(findCoffeeStoreFromContext) {
+        if (findCoffeeStoreFromContext) {
           setCoffeeStore(findCoffeeStoreFromContext);
           handleCreateCoffeeStore(findCoffeeStoreFromContext);
         }
       }
-    }else {
+    } else {
       //SSG
       handleCreateCoffeeStore(initialProps.coffeeStore);
     }
   }, [id, initialProps, initialProps.coffeeStore]);
 
-  const { name, location, imgUrl } = coffeeStore;
+  const { name = '', location = '', imgUrl = '' } = coffeeStore;
 
   const [votingCount, setVotingCount] = useState(0);
 
   const fetcher = (...args) => fetch(...args).then(res => res.json());
-  const {data, error} = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
- 
+  const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
+
   useEffect(() => {
-    if(data && data.length > 0) {
+    if (data && data.length > 0) {
       const coffeeDataFromDb = {
         location: {
           address: data[0].address,
@@ -122,20 +122,22 @@ const CoffeeStore = (initialProps) => {
         })
       });
       const dbCoffeeStore = await response.json();
-      if(dbCoffeeStore && dbCoffeeStore.length > 0) {
+      if (dbCoffeeStore && dbCoffeeStore.length > 0) {
         let count = votingCount + 1;
         setVotingCount(count);
       }
-    }catch(err) {
+    } catch (err) {
       console.error("Error upvoting", err);
-    } 
+    }
   };
-  
-    if (router.isFallback) {
+
+  if (router.isFallback) {
     return <div>Loading....</div>;
   }
 
-  if(error) {
+
+
+  if (error) {
     return <div>Something went wrong</div>
   }
 
